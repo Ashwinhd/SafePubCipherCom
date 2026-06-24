@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="cv-card">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">File Details</h3>
+            <a href="{{ url_for('vault.index') }}" class="btn-cv btn-cv-ghost btn-cv-sm">&larr; Back to Vault</a>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:1.25rem;">
+            <!-- File Info Rows -->
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">Original Filename:</span>
+                <span style="font-weight:600; color:var(--text-primary); font-family:var(--font-mono);">{{ vf.original_name }}</span>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">Internal Stored Name:</span>
+                <span style="font-weight:500; color:var(--text-muted); font-size:0.8rem; font-family:var(--font-mono);">{{ vf.stored_name }}</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">File Size:</span>
+                <span style="font-weight:600; color:var(--text-primary);">{{ vf.size_human }} ({{ "{:,}".format(vf.file_size) }} bytes)</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">Cryptographic Algorithm:</span>
+                <span class="cv-badge cv-badge-cyan" style="font-size:0.85rem;">{{ vf.algorithm }}</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">Uploaded Date:</span>
+                <span style="font-weight:600; color:var(--text-primary);">{{ vf.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</span>
+            </div>
+
+            {% if vf.description %}
+            <div style="display:flex; flex-direction:column; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <span style="color:var(--text-secondary); font-size:0.9rem;">Description / Note:</span>
+                <p style="font-size:0.85rem; color:var(--text-primary); line-height:1.5;">{{ vf.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div style="display:flex; gap:1rem; margin-top:1.5rem; justify-content:flex-end;">
+                <form action="{{ url_for('vault.delete', file_id=vf.id) }}" method="POST" style="display:inline;" data-confirm="Are you sure you want to permanently delete this file?">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-cv btn-cv-danger">Delete File</button>
+                </form>
+                <a href="{{ url_for('vault.download', file_id=vf.id) }}" class="btn-cv btn-cv-primary">Download File</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

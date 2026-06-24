@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="cv-card" style="margin-bottom: 2rem;">
+    <!-- Search Form -->
+    <form method="GET" action="" style="display:flex; gap:0.75rem; align-items:center;">
+        <div style="flex:1;">
+            {{ form.query(class="cv-input", placeholder="Search files by original name or description...", value=request.args.get('query', '')) }}
+        </div>
+        <button type="submit" class="btn-cv btn-cv-primary">Search</button>
+        {% if request.args.get('query') %}
+            <a href="{{ url_for('vault.index') }}" class="btn-cv btn-cv-outline">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Vault Grid -->
+{% if files.items %}
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+    {% for f in files.items %}
+    <div class="cv-card cv-card-glow" style="display:flex; flex-direction:column; justify-content:space-between; min-height:180px;">
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.75rem;">
+                <span style="font-size:1.5rem;">📁</span>
+                <span class="cv-badge cv-badge-cyan">{{ f.algorithm }}</span>
+            </div>
+            <h4 style="font-size:0.95rem; font-weight:600; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap; margin-bottom:0.25rem;" title="{{ f.original_name }}">
+                {{ f.original_name }}
+            </h4>
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.5rem;">{{ f.size_human }} • {{ f.created_at.strftime('%Y-%m-%d') }}</p>
+            {% if f.description %}
+            <p style="font-size:0.8rem; color:var(--text-secondary); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                {{ f.description }}
+            </p>
+            {% endif %}
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:1.25rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+            <a href="{{ url_for('vault.detail', file_id=f.id) }}" class="btn-cv btn-cv-ghost btn-cv-sm" style="padding:0.3rem 0.5rem;">Details</a>
+            <div style="display:flex; gap:0.5rem;">
+                <a href="{{ url_for('vault.download', file_id=f.id) }}" class="btn-cv btn-cv-outline btn-cv-sm" style="padding:0.3rem 0.5rem;" title="Download File">Download</a>
+                <form action="{{ url_for('vault.delete', file_id=f.id) }}" method="POST" style="display:inline;" data-confirm="Are you sure you want to delete this file from your vault?">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn-cv btn-cv-danger btn-cv-sm" style="padding:0.3rem 0.5rem;">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if files.pages > 1 %}
+<div style="display:flex; justify-content:center; align-items:center; margin-top:2rem;">
+    <div class="cv-pagination">
+        <a href="{{ url_for('vault.index', page=files.prev_num, query=request.args.get('query', '')) }}" class="cv-page-btn {% if not files.has_prev %}disabled{% endif %}">&laquo; Prev</a>
+        {% for p in files.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+            {% if p %}
+                <a href="{{ url_for('vault.index', page=p, query=request.args.get('query', '')) }}" class="cv-page-btn {% if p == files.page %}active{% endif %}">{{ p }}</a>
+            {% else %}
+                <span style="color:var(--text-muted); padding:0.25rem;">...</span>
+            {% endif %}
+        {% endfor %}
+        <a href="{{ url_for('vault.index', page=files.next_num, query=request.args.get('query', '')) }}" class="cv-page-btn {% if not files.has_next %}disabled{% endif %}">Next &raquo;</a>
+    </div>
+</div>
+{% endif %}
+
+{% else %}
+<div class="cv-card" style="text-align:center; padding:5rem 0;">
+    <div style="font-size:3rem; margin-bottom:1rem;">📂</div>
+    <h3>No files found in Vault</h3>
+    <p style="color:var(--text-secondary); font-size:0.9rem; margin-top:0.5rem; margin-bottom:1.5rem;">
+        You can upload and encrypt files to secure them here.
+    </p>
+    <a href="{{ url_for('encrypt.encrypt_file') }}" class="btn-cv btn-cv-primary">Encrypt & Upload File</a>
+</div>
+{% endif %}
+{% endblock %}

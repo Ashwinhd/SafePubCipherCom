@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 1200px; margin: 0 auto; display:flex; flex-direction:column; gap:2rem;">
+    <!-- Top row: Summary + Success/Failure ratio -->
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:1.5rem;">
+        <div class="cv-card" style="display:flex; flex-direction:column; justify-content:center;">
+            <h3 class="cv-card-title" style="margin-bottom:0.75rem;">Usage Analytics Dashboard</h3>
+            <p style="color:var(--text-secondary); font-size:0.9rem; line-height:1.6; max-width:600px;">
+                Real-time cryptographic operational log analytics and keyboard typing metrics. Chart logs are compiled directly from the secure audit system database.
+            </p>
+        </div>
+        
+        <div class="cv-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1.25rem;">
+            <h4 style="font-size:0.8rem; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem;">Crypto Success Rate</h4>
+            {% set total_ops = success_count + fail_count %}
+            {% if total_ops > 0 %}
+                {% set success_rate = (success_count / total_ops * 100) | round(1) %}
+                <div style="font-size:2.25rem; font-weight:700; color:var(--success);">{{ success_rate }}%</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">{{ success_count }} succeeded, {{ fail_count }} failed</div>
+            {% else %}
+                <div style="font-size:1.5rem; font-weight:700; color:var(--text-muted);">No logs yet</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">Perform operations to view rates</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Charts Grid Row 1 -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+        <!-- Algorithm Preference -->
+        <div class="cv-card">
+            <div class="cv-card-header">
+                <h3 class="cv-card-title">Cryptographic Algorithm Preference</h3>
+            </div>
+            <div class="chart-container" style="height:250px;">
+                <canvas id="algoChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Operations Breakdown -->
+        <div class="cv-card">
+            <div class="cv-card-header">
+                <h3 class="cv-card-title">Operations Breakdown</h3>
+            </div>
+            <div class="chart-container" style="height:250px;">
+                <canvas id="opChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Grid Row 2 -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+        <!-- Daily Activity -->
+        <div class="cv-card">
+            <div class="cv-card-header">
+                <h3 class="cv-card-title">Daily Activity (Last 7 Days)</h3>
+            </div>
+            <div class="chart-container" style="height:250px;">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Typing Trainer Progress -->
+        <div class="cv-card">
+            <div class="cv-card-header">
+                <h3 class="cv-card-title">Typing Trainer Speed & Accuracy</h3>
+            </div>
+            <div class="chart-container" style="height:250px;">
+                <canvas id="typingChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Global Chart Defaults
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.borderColor = 'rgba(42, 47, 74, 0.4)';
+
+        // 1. Algo Chart
+        const algoCtx = document.getElementById('algoChart').getContext('2d');
+        new Chart(algoCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ algo_labels | tojson }},
+                datasets: [{
+                    data: {{ algo_counts | tojson }},
+                    backgroundColor: ['#6366f1', '#22d3ee', '#f59e0b', '#f43f5e', '#22c55e'],
+                    borderWidth: 1,
+                    borderColor: '#161927'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { boxWidth: 12 }
+                    }
+                }
+            }
+        });
+
+        // 2. Op Chart
+        const opCtx = document.getElementById('opChart').getContext('2d');
+        new Chart(opCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ op_labels | tojson }},
+                datasets: [{
+                    label: 'Operations Count',
+                    data: {{ op_counts | tojson }},
+                    backgroundColor: 'rgba(99, 102, 241, 0.75)',
+                    borderColor: '#6366f1',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 3. Activity Chart
+        const actCtx = document.getElementById('activityChart').getContext('2d');
+        const actGradient = actCtx.createLinearGradient(0, 0, 0, 200);
+        actGradient.addColorStop(0, 'rgba(34, 211, 238, 0.4)');
+        actGradient.addColorStop(1, 'rgba(34, 211, 238, 0)');
+
+        new Chart(actCtx, {
+            type: 'line',
+            data: {
+                labels: {{ daily_labels | tojson }},
+                datasets: [{
+                    label: 'Operations',
+                    data: {{ daily_counts | tojson }},
+                    borderColor: '#22d3ee',
+                    backgroundColor: actGradient,
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#22d3ee'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // 4. Typing Chart
+        const typCtx = document.getElementById('typingChart').getContext('2d');
+        new Chart(typCtx, {
+            type: 'line',
+            data: {
+                labels: {{ typing_labels | tojson }},
+                datasets: [
+                    {
+                        label: 'WPM',
+                        data: {{ typing_wpm | tojson }},
+                        borderColor: '#6366f1',
+                        backgroundColor: '#6366f1',
+                        yAxisID: 'y',
+                        tension: 0.2,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Accuracy (%)',
+                        data: {{ typing_acc | tojson }},
+                        borderColor: '#22c55e',
+                        backgroundColor: '#22c55e',
+                        yAxisID: 'y1',
+                        tension: 0.2,
+                        borderWidth: 2,
+                        borderDash: [5, 5]
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: { display: true, text: 'WPM', color: '#6366f1' },
+                        grid: { drawOnChartArea: true }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        min: 0,
+                        max: 100,
+                        title: { display: true, text: 'Accuracy (%)', color: '#22c55e' },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 2rem auto; text-align: center;">
+    <h1 class="display-title" style="margin-bottom: 1.5rem;">Secure Cryptography & Steganography</h1>
+    <p style="font-size: 1.15rem; color: var(--text-secondary); margin-bottom: 2.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        CipherVault Pro is a state-of-the-art secure platform that lets you encrypt files and text, hide secrets inside images, store sensitive assets, and send self-destructing messages.
+    </p>
+    
+    <div style="display: flex; justify-content: center; gap: 1.5rem; margin-bottom: 4rem;">
+        <a href="{{ url_for('auth.login') }}" class="btn-cv btn-cv-primary btn-cv-lg">Log In to Session</a>
+        <a href="{{ url_for('auth.register') }}" class="btn-cv btn-cv-outline btn-cv-lg">Create Secure Account</a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; text-align: left;">
+        <div class="cv-card cv-card-glow">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🔐</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Strong Cryptography</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Encrypt text and files using modern algorithms like AES-256 (EAX), Blowfish (EAX), or 3DES with PBKDF2-HMAC-SHA256 key derivation.
+            </p>
+        </div>
+        
+        <div class="cv-card cv-card-glow">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🖼️</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Steganography</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Embed text and files discreetly inside the pixels of ordinary-looking carrier images using Least Significant Bit (LSB) embedding.
+            </p>
+        </div>
+
+        <div class="cv-card cv-card-glow">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">⏳</div>
+            <h3 style="margin-bottom: 0.5rem; color: var(--text-primary);">Self-Destruct Messages</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                Create secure, shareable links with a customized read limit or expiration timer. Once accessed or expired, the message is permanently wiped.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

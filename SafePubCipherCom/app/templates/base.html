@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>{% if title %}{{ title }} — {% endif %}CipherVault Pro</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div id="sidebar-overlay"></div>
+
+    <div class="cv-wrapper">
+        <!-- Sidebar -->
+        <aside id="cv-sidebar" class="cv-sidebar">
+            <div class="cv-sidebar-brand">
+                <div class="brand-icon">🔒</div>
+                <div class="brand-name">CipherVault <span style="color:var(--cyan)">Pro</span></div>
+                <div class="brand-tag">SECURE CRYPTO VAULT</div>
+            </div>
+
+            <nav class="cv-nav">
+                {% if current_user.is_authenticated %}
+                <div class="cv-nav-section">Dashboard</div>
+                <a href="{{ url_for('main.dashboard') }}" class="cv-nav-item">
+                    <span class="nav-icon">📊</span> Dashboard
+                </a>
+                <a href="{{ url_for('vault.index') }}" class="cv-nav-item">
+                    <span class="nav-icon">📁</span> My Vault
+                </a>
+
+                <div class="cv-nav-section">Cryptography</div>
+                <a href="{{ url_for('encrypt.encrypt_text') }}" class="cv-nav-item">
+                    <span class="nav-icon">📝</span> Encrypt Text
+                </a>
+                <a href="{{ url_for('encrypt.decrypt_text') }}" class="cv-nav-item">
+                    <span class="nav-icon">🔓</span> Decrypt Text
+                </a>
+                <a href="{{ url_for('encrypt.encrypt_file') }}" class="cv-nav-item">
+                    <span class="nav-icon">📁</span> Encrypt File
+                </a>
+                <a href="{{ url_for('encrypt.decrypt_file') }}" class="cv-nav-item">
+                    <span class="nav-icon">📂</span> Decrypt File
+                </a>
+
+                <div class="cv-nav-section">Steganography</div>
+                <a href="{{ url_for('stego.hide') }}" class="cv-nav-item">
+                    <span class="nav-icon">🖼️</span> Hide Secret
+                </a>
+                <a href="{{ url_for('stego.extract') }}" class="cv-nav-item">
+                    <span class="nav-icon">🔍</span> Extract Secret
+                </a>
+
+                <div class="cv-nav-section">Secure Sharing</div>
+                <a href="{{ url_for('messages.create') }}" class="cv-nav-item">
+                    <span class="nav-icon">✉️</span> Self-Destruct
+                </a>
+                <a href="{{ url_for('messages.index') }}" class="cv-nav-item">
+                    <span class="nav-icon">📋</span> Message Logs
+                </a>
+
+                <div class="cv-nav-section">Utilities</div>
+                <a href="{{ url_for('trainer.index') }}" class="cv-nav-item">
+                    <span class="nav-icon">⌨️</span> Typing Trainer
+                </a>
+                <a href="{{ url_for('analytics.index') }}" class="cv-nav-item">
+                    <span class="nav-icon">📈</span> Analytics
+                </a>
+                {% else %}
+                <div class="cv-nav-section">Account</div>
+                <a href="{{ url_for('auth.login') }}" class="cv-nav-item">
+                    <span class="nav-icon">🔑</span> Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="cv-nav-item">
+                    <span class="nav-icon">👤</span> Register
+                </a>
+                {% endif %}
+            </nav>
+
+            {% if current_user.is_authenticated %}
+            <div class="cv-sidebar-footer" style="display:flex; align-items:center; gap:0.75rem;">
+                <div class="cv-avatar" style="background-color:{{ current_user.avatar_color }}">
+                    {{ current_user.initials }}
+                </div>
+                <div style="flex:1; overflow:hidden;">
+                    <div style="font-weight:600; font-size:0.85rem; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">
+                        {{ current_user.username }}
+                    </div>
+                    <a href="{{ url_for('auth.profile') }}" style="font-size:0.75rem; color:var(--accent-light);">Profile Settings</a>
+                </div>
+                <a href="{{ url_for('auth.logout') }}" title="Logout" style="font-size:1.1rem; color:var(--text-secondary);">🚪</a>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- Main Area -->
+        <main class="cv-main">
+            <!-- Topbar -->
+            <header class="cv-topbar">
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <button id="mobile-toggle" style="background:transparent; border:none; color:var(--text-primary); font-size:1.25rem; cursor:pointer; display:none;">☰</button>
+                    <h2 class="cv-topbar-title">{% if title %}{{ title }}{% else %}CipherVault Pro{% endif %}</h2>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    {% if current_user.is_authenticated %}
+                    <span class="cv-badge cv-badge-accent">SECURE SESSION</span>
+                    {% else %}
+                    <span class="cv-badge cv-badge-muted">ANONYMOUS</span>
+                    {% endif %}
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="cv-content">
+                <!-- Flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-messages">
+                            {% for category, msg in messages %}
+                                <div class="cv-alert cv-alert-{{ category }}" data-auto-dismiss>
+                                    <span class="alert-icon">
+                                        {% if category == 'success' %}✓
+                                        {% elif category == 'danger' %}✕
+                                        {% elif category == 'warning' %}⚠
+                                        {% else %}ℹ
+                                        {% endif %}
+                                    </span>
+                                    <div class="alert-content">{{ msg }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

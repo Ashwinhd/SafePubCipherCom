@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="cv-card" style="margin-bottom:2rem;">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Extract Secret (Steganographic Recovery)</h3>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label">Cover Image Containing Hidden Secret</label>
+                <div class="cv-dropzone" id="image-dropzone">
+                    <div class="cv-dropzone-icon">🔍</div>
+                    <div class="cv-dropzone-text">Drag & drop cover image here, or click to browse</div>
+                    {{ form.image(id="stego-image-input") }}
+                </div>
+                {% if form.image.errors %}
+                    {% for error in form.image.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.5rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Payload decryption key", id="stego-pass") }}
+                        <button type="button" data-toggle-pw="stego-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+
+    {% if result_text is not none %}
+    <div class="cv-card" id="extraction-result">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Extracted Secret Text</h3>
+            <button class="btn-cv btn-cv-ghost btn-cv-sm" data-copy="#stego-text-output">📋 Copy Text</button>
+        </div>
+        <pre class="cv-code-block" id="stego-text-output" style="color:var(--text-primary);">{{ result_text }}</pre>
+    </div>
+    {% endif %}
+
+    {% if result_b64 is not none %}
+    <div class="cv-card" id="extraction-result-b64">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Extracted Secret Data (Base64)</h3>
+            <button class="btn-cv btn-cv-ghost btn-cv-sm" data-copy="#stego-b64-output">📋 Copy Base64</button>
+        </div>
+        <pre class="cv-code-block" id="stego-b64-output" style="color:var(--cyan);">{{ result_b64 }}</pre>
+        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.75rem;">
+            The extracted payload contains binary data (non-text). You can copy the base64-encoded output above to save or decode it.
+        </p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

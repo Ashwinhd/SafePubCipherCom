@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="cv-card">
+        <div style="display:flex; align-items:center; gap:1.25rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+            <div class="cv-avatar" style="width:64px; height:64px; font-size:1.5rem; background-color:{{ current_user.avatar_color }}">
+                {{ current_user.initials }}
+            </div>
+            <div>
+                <h2 style="font-size:1.35rem; margin-bottom:0.25rem;">{{ current_user.username }}</h2>
+                <p style="color:var(--text-secondary); font-size:0.85rem;">Member since {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+            </div>
+        </div>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <h3 style="font-size:1rem; margin-bottom:1rem; color:var(--accent-light);">Profile Information</h3>
+            
+            <div class="cv-form-group">
+                <label class="cv-label" for="full_name">{{ form.full_name.label.text }}</label>
+                {{ form.full_name(class="cv-input", placeholder="Your display name") }}
+                {% if form.full_name.errors %}
+                    {% for error in form.full_name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="bio">{{ form.bio.label.text }}</label>
+                {{ form.bio(class="cv-input", placeholder="Brief description") }}
+                {% if form.bio.errors %}
+                    {% for error in form.bio.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <h3 style="font-size:1rem; margin-top:2rem; margin-bottom:1rem; color:var(--accent-light);">Change Password (Optional)</h3>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-bottom:1rem;">To update your password, fill in the fields below. Otherwise leave them blank.</p>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="current_password">{{ form.current_password.label.text }}</label>
+                <div class="cv-input-group">
+                    {{ form.current_password(class="cv-input", placeholder="Current password", id="curr-password") }}
+                    <button type="button" data-toggle-pw="curr-password" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                </div>
+                {% if form.current_password.errors %}
+                    {% for error in form.current_password.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="new_password">{{ form.new_password.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.new_password(class="cv-input", placeholder="Min. 8 characters", id="new-password") }}
+                        <button type="button" data-toggle-pw="new-password" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.new_password.errors %}
+                        {% for error in form.new_password.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="confirm_new_password">{{ form.confirm_new_password.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.confirm_new_password(class="cv-input", placeholder="Re-enter new password", id="confirm-new-password") }}
+                        <button type="button" data-toggle-pw="confirm-new-password" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.confirm_new_password.errors %}
+                        {% for error in form.confirm_new_password.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

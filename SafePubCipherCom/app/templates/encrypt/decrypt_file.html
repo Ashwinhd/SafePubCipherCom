@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="cv-card">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Decrypt File</h3>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label">Upload Encrypted File (.enc)</label>
+                <div class="cv-dropzone" id="file-dropzone">
+                    <div class="cv-dropzone-icon">📥</div>
+                    <div class="cv-dropzone-text">Drag and drop your encrypted file here, or click to select</div>
+                    {{ form.file(id="file-input") }}
+                </div>
+                {% if form.file.errors %}
+                    {% for error in form.file.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.5rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Enter decryption key", id="file-dec-pass") }}
+                        <button type="button" data-toggle-pw="file-dec-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

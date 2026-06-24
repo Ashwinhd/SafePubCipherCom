@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 460px; margin: 2rem auto;">
+    <div class="cv-card">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👤</div>
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem;">Create Account</h2>
+            <p style="color: var(--text-secondary); font-size: 0.85rem;">Register a secure cryptographic identity</p>
+        </div>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            
+            <div class="cv-form-group">
+                <label class="cv-label" for="username">{{ form.username.label.text }}</label>
+                {{ form.username(class="cv-input", placeholder="Letters, numbers, underscores") }}
+                {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="email">{{ form.email.label.text }}</label>
+                {{ form.email(class="cv-input", placeholder="Enter email address") }}
+                {% if form.email.errors %}
+                    {% for error in form.email.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="full_name">{{ form.full_name.label.text }} (Optional)</label>
+                {{ form.full_name(class="cv-input", placeholder="Your display name") }}
+                {% if form.full_name.errors %}
+                    {% for error in form.full_name.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="password">{{ form.password.label.text }}</label>
+                <div class="cv-input-group">
+                    {{ form.password(class="cv-input", placeholder="Min. 8 characters", id="reg-password") }}
+                    <button type="button" data-toggle-pw="reg-password" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                </div>
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="confirm_password">{{ form.confirm_password.label.text }}</label>
+                <div class="cv-input-group">
+                    {{ form.confirm_password(class="cv-input", placeholder="Re-enter password", id="reg-confirm-password") }}
+                    <button type="button" data-toggle-pw="reg-confirm-password" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                </div>
+                {% if form.confirm_password.errors %}
+                    {% for error in form.confirm_password.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.25rem; font-size: 0.85rem; color: var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

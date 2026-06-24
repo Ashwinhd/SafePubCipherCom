@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="cv-card">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Encrypt File</h3>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label">Upload File</label>
+                <div class="cv-dropzone" id="file-dropzone">
+                    <div class="cv-dropzone-icon">📥</div>
+                    <div class="cv-dropzone-text">Drag and drop your file here, or click to select</div>
+                    {{ form.file(id="file-input") }}
+                </div>
+                {% if form.file.errors %}
+                    {% for error in form.file.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.5rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Enter encryption key", id="file-enc-pass") }}
+                        <button type="button" data-toggle-pw="file-enc-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="cv-form-group" style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1.25rem;">
+                <label class="cv-form-check" style="margin-bottom:0.75rem;">
+                    {{ form.save_to_vault() }}
+                    <span style="font-size:0.85rem; color:var(--text-primary);">Save encrypted output to my secure Vault</span>
+                </label>
+                
+                <div id="vault-note-group" style="margin-top: 0.75rem; display: none;">
+                    <label class="cv-label" for="vault_description">{{ form.vault_description.label.text }}</label>
+                    {{ form.vault_description(class="cv-input", placeholder="Add a descriptive note for your vault log") }}
+                    {% if form.vault_description.errors %}
+                        {% for error in form.vault_description.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkbox = document.querySelector('input[name="save_to_vault"]');
+        const noteGroup = document.getElementById('vault-note-group');
+        if (checkbox && noteGroup) {
+            const toggle = () => {
+                noteGroup.style.display = checkbox.checked ? 'block' : 'none';
+            };
+            checkbox.addEventListener('change', toggle);
+            toggle();
+        }
+    });
+</script>
+{% endblock %}

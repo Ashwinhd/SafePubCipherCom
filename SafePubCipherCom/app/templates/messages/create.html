@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    {% if share_url %}
+    <div class="cv-card" style="margin-bottom: 2rem; border-color: var(--success); box-shadow: var(--shadow-glow);">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title" style="color:var(--success);">Link Generated Successfully</h3>
+            <button class="btn-cv btn-cv-ghost btn-cv-sm" data-copy="#share-url-text">📋 Copy Link</button>
+        </div>
+        <pre class="cv-code-block" id="share-url-text" style="color:var(--text-primary); font-size:0.9rem;">{{ share_url }}</pre>
+        <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.75rem;">
+            Provide this URL and the decryption passphrase to the recipient. Once the limit is met, this link will point to a "destroyed" landing page and its data will be unreachable.
+        </p>
+        <div style="margin-top:1.25rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+            <a href="{{ url_for('messages.index') }}" class="btn-cv btn-cv-outline btn-cv-sm">View All Links</a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="cv-card">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Create Self-Destruct Message</h3>
+        </div>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="title">{{ form.title.label.text }}</label>
+                {{ form.title(class="cv-input", placeholder="e.g. Database credentials (optional)") }}
+                {% if form.title.errors %}
+                    {% for error in form.title.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="content">{{ form.content.label.text }}</label>
+                {{ form.content(class="cv-textarea", placeholder="Type the sensitive contents here...") }}
+                {% if form.content.errors %}
+                    {% for error in form.content.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Passphrase to encrypt", id="msg-pass") }}
+                        <button type="button" data-toggle-pw="msg-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:0.5rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="max_reads">{{ form.max_reads.label.text }}</label>
+                    {{ form.max_reads(class="cv-input", type="number", min="0") }}
+                    {% if form.max_reads.errors %}
+                        {% for error in form.max_reads.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="expires_hours">{{ form.expires_hours.label.text }}</label>
+                    {{ form.expires_hours(class="cv-input", type="number", min="0") }}
+                    {% if form.expires_hours.errors %}
+                        {% for error in form.expires_hours.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="cv-card" style="margin-bottom: 2rem;">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Decrypt Text</h3>
+        </div>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="ciphertext_b64">{{ form.ciphertext_b64.label.text }}</label>
+                {{ form.ciphertext_b64(class="cv-textarea", placeholder="Paste the encrypted Base64 block here...") }}
+                {% if form.ciphertext_b64.errors %}
+                    {% for error in form.ciphertext_b64.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Enter decryption passphrase", id="dec-pass") }}
+                        <button type="button" data-toggle-pw="dec-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+
+    {% if result_text is not none %}
+    <div class="cv-card" id="decryption-result">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Decrypted Text Output</h3>
+            <button class="btn-cv btn-cv-ghost btn-cv-sm" data-copy="#plaintext-output">📋 Copy Plaintext</button>
+        </div>
+        <pre class="cv-code-block" id="plaintext-output" style="color:var(--text-primary);">{{ result_text }}</pre>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

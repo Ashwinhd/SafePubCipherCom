@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 720px; margin: 0 auto;">
+    <div class="cv-card" style="margin-bottom:2rem;">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Hide Secret (Steganographic Embedding)</h3>
+        </div>
+
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="cv-form-group">
+                <label class="cv-label">Carrier Image (PNG/BMP recommended to prevent compression loss)</label>
+                <div class="cv-dropzone" id="image-dropzone">
+                    <div class="cv-dropzone-icon">🖼️</div>
+                    <div class="cv-dropzone-text">Drag & drop cover image here, or click to browse</div>
+                    {{ form.image(id="stego-image-input") }}
+                </div>
+                {% if form.image.errors %}
+                    {% for error in form.image.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <!-- Image Capacity Card (updated dynamically via JS) -->
+            <div id="capacity-card" class="cv-card" style="display:none; padding:1rem; background:rgba(255,255,255,0.015); border:1px solid var(--border); margin-bottom:1.5rem; border-radius:var(--radius-sm);">
+                <h4 style="font-size:0.85rem; margin-bottom:0.5rem; color:var(--cyan);">Cover Image Analysis</h4>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; font-size:0.8rem;">
+                    <div>Dimensions: <span id="cap-dim" style="font-weight:600; color:var(--text-primary);">—</span></div>
+                    <div>Pixels: <span id="cap-pixels" style="font-weight:600; color:var(--text-primary);">—</span></div>
+                    <div>LSB Capacity: <span id="cap-bytes" style="font-weight:600; color:var(--success);">—</span></div>
+                </div>
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="secret_text">{{ form.secret_text.label.text }}</label>
+                {{ form.secret_text(class="cv-textarea", placeholder="Enter the secret message you want to hide...") }}
+                {% if form.secret_text.errors %}
+                    {% for error in form.secret_text.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="cv-form-group">
+                <label class="cv-label" for="secret_file">{{ form.secret_file.label.text }}</label>
+                {{ form.secret_file(class="cv-input", style="padding:0.4rem;") }}
+                {% if form.secret_file.errors %}
+                    {% for error in form.secret_file.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1.5rem;">
+                <div class="cv-form-group">
+                    <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                    <div class="cv-input-group">
+                        {{ form.passphrase(class="cv-input", placeholder="Key to encrypt payload", id="stego-pass") }}
+                        <button type="button" data-toggle-pw="stego-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                    </div>
+                    {% if form.passphrase.errors %}
+                        {% for error in form.passphrase.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <div class="cv-form-group">
+                    <label class="cv-label" for="algorithm">{{ form.algorithm.label.text }}</label>
+                    {{ form.algorithm(class="cv-select") }}
+                    <span class="algo-hint" style="display:block; font-size:0.75rem; color:var(--text-muted); margin-top:0.35rem;"></span>
+                    {% if form.algorithm.errors %}
+                        {% for error in form.algorithm.errors %}
+                            <div class="field-error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const imageInput = document.getElementById('stego-image-input');
+        const capacityCard = document.getElementById('capacity-card');
+        const capDim = document.getElementById('cap-dim');
+        const capPixels = document.getElementById('cap-pixels');
+        const capBytes = document.getElementById('cap-bytes');
+
+        const updateCapacity = (file) => {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('image', file);
+
+            fetch("{{ url_for('stego.capacity') }}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content },
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    capacityCard.style.display = 'none';
+                    return;
+                }
+                capDim.textContent = `${data.width} × ${data.height}`;
+                capPixels.textContent = data.pixels.toLocaleString();
+                capBytes.textContent = `${data.lsb_capacity_kb} KB (${data.lsb_capacity_bytes.toLocaleString()} bytes)`;
+                capacityCard.style.display = 'block';
+            })
+            .catch(() => {
+                capacityCard.style.display = 'none';
+            });
+        };
+
+        if (imageInput) {
+            imageInput.addEventListener('change', (e) => {
+                updateCapacity(e.target.files[0]);
+            });
+        }
+    });
+</script>
+{% endblock %}

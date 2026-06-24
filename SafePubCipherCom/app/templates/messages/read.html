@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto;">
+    <!-- If decrypted successfully, show content -->
+    {% if content %}
+    <div class="cv-card" style="border-color:var(--success); box-shadow:var(--shadow-glow);">
+        <div class="cv-card-header">
+            <h3 class="cv-card-title">Unlocked Message Content</h3>
+            <button class="btn-cv btn-cv-ghost btn-cv-sm" data-copy="#decrypted-message">📋 Copy Content</button>
+        </div>
+        
+        <pre class="cv-code-block" id="decrypted-message" style="color:var(--text-primary); font-size:0.95rem; white-space:pre-wrap;">{{ content }}</pre>
+
+        <div style="margin-top:1.5rem; background:rgba(244,63,94,0.06); border:1px solid var(--danger); padding:0.75rem 1rem; border-radius:var(--radius-sm); font-size:0.8rem; color:#fda4af; display:flex; align-items:center; gap:0.5rem;">
+            <span>⚠️</span>
+            <div>
+                <strong>Warning:</strong> This message may have met its read limit and could now be destroyed. Copy any critical details before closing this page.
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Otherwise prompt for passphrase -->
+    <div class="cv-card">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">✉️</div>
+            <h2 style="font-size: 1.35rem; margin-bottom: 0.25rem;">{{ msg.title or 'Secure Message' }}</h2>
+            <p style="color: var(--text-secondary); font-size: 0.82rem;">This message is encrypted. Enter the passphrase to unlock it.</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.015); border:1px solid var(--border); padding:0.75rem 1rem; border-radius:var(--radius-sm); font-size:0.78rem; color:var(--text-secondary); display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1.5rem;">
+            <div>Algorithm: <span class="cv-badge cv-badge-cyan" style="font-size:0.65rem; padding:0.1rem 0.4rem;">{{ msg.algorithm }}</span></div>
+            <div>Reads: <span style="font-weight:600; color:var(--text-primary);">{{ msg.read_count }} / {{ msg.max_reads if msg.max_reads > 0 else '∞' }}</span></div>
+            <div style="grid-column:span 2;">Expires: <span style="font-weight:600; color:var(--text-primary);">{{ time_until(msg.expires_at) if msg.expires_at else 'Never' }}</span></div>
+        </div>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+            
+            <div class="cv-form-group">
+                <label class="cv-label" for="passphrase">{{ form.passphrase.label.text }}</label>
+                <div class="cv-input-group">
+                    {{ form.passphrase(class="cv-input", placeholder="Enter the password supplied by sender", id="msg-unlock-pass") }}
+                    <button type="button" data-toggle-pw="msg-unlock-pass" style="position:absolute; right:0.75rem; top:50%; transform:translateY(-50%); background:transparent; border:none; color:var(--text-muted); cursor:pointer;">👁</button>
+                </div>
+                {% if form.passphrase.errors %}
+                    {% for error in form.passphrase.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-cv btn-cv-primary" style="width:100%; justify-content:center; margin-top:1.5rem;">
+                {{ form.submit.label.text }}
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
